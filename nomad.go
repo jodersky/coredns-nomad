@@ -123,9 +123,17 @@ func addServiceResponses(m *dns.Msg, svcRegistrations []*api.ServiceRegistration
 
 		switch qtype {
 		case dns.TypeA:
-			addARecord(m, header, addr)
+			if !strings.Contains(s.Address, ":") {
+				addARecord(m, header, addr)
+			} else {
+				m.Rcode = dns.RcodeNameError
+			}
 		case dns.TypeAAAA:
-			addAAAARecord(m, header, addr)
+			if strings.Contains(s.Address, ":") {
+				addAAAARecord(m, header, addr)
+			} else {
+				m.Rcode = dns.RcodeNameError
+			}
 		case dns.TypeSRV:
 			err := addSRVRecord(m, s, header, originalQName, addr, ttl)
 			if err != nil {
